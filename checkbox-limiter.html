@@ -1,0 +1,53 @@
+<style type="text/css">
+.checkbox.count-max-reached {font-weight: bold}
+.faux-disable {opacity: 0.6}
+</style>
+<script type="text/javascript">
+function checkboxCount(fieldset, max, checkcounter, thischeckbox, checkcounttext){
+	var current = fieldset.querySelectorAll(':checked').length;
+	if (current > max) {
+		thischeckbox.checked=false;
+	} else {
+		if (current == max){
+			thischeckbox.parentNode.parentNode.querySelectorAll("input[type=checkbox]:not(:checked)").forEach(function(e) {e.parentNode.classList.add("faux-disable")});
+			checkcounter.classList.add("count-max-reached");
+		} else if (current < max){
+			thischeckbox.parentNode.parentNode.querySelectorAll("input[type=checkbox]:not(:checked)").forEach(function(e) {e.parentNode.classList.remove("faux-disable")});
+			checkcounter.classList.remove("count-max-reached");
+		}
+		checkcounter.innerHTML = checkcounttext.replace("{{selected}}", current).replace("{{max}}", max);
+	}
+}
+
+function fieldsetInit(fieldsetid, max, checkcounttext) {
+	var fieldset = document.querySelector('fieldset#label'+fieldsetid);
+	var fieldsetcheckboxes = fieldset.querySelectorAll('input[type="checkbox"]');
+
+	let checkcounter = document.createElement("span");
+	checkcounter.id = "checkcounter"+fieldsetid;
+	checkcounter.classList.add("checkcounter");
+	checkcounter.innerHTML = checkcounttext.replace("{{selected}}", 0).replace("{{max}}", max);
+	fieldset.parentNode.insertBefore(checkcounter, fieldset);
+	fieldsetcheckboxes.forEach(function(element) { 
+		element.addEventListener('change', function(event){
+			var thischeckbox = this;
+			checkboxCount(fieldset, max, checkcounter, thischeckbox, checkcounttext);
+		});
+	});
+}
+
+var ready = (callback) => {
+	if (document.readyState != "loading") callback();
+	else document.addEventListener("DOMContentLoaded", callback);
+}
+
+ready(function(){
+    // Update fieldsetInit parameters - first parameter is the field id (can be found in url when editing checkbox field https://www.formstack.com/admin/form/builder/##formid##/build/field/##fieldid###)
+    // Use fieldsetInit once for each checkbox field. Use it as many times as you like. See if I care.
+	var globalfieldsetmax = 5;
+	var globalfieldsettext = "{{selected}} of {{max}} items selected."
+	fieldsetInit(11122233, 3, "You've selected {{selected}} of {{max}} months.");
+	fieldsetInit(44455566, globalfieldsetmax, globalfieldsettext);
+	fieldsetInit(77788899, globalfieldsetmax, globalfieldsettext);
+});
+</script>
